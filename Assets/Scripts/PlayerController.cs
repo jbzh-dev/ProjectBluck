@@ -3,6 +3,8 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
     [SerializeField] private float moveSpeed = 5f;
+    [SerializeField] private Animator animator;
+    [SerializeField] private SpriteRenderer spriteRenderer;
 
     private PlayerControls playerControls;
     private Vector2 movement;
@@ -12,6 +14,10 @@ public class PlayerController : MonoBehaviour
     {
         playerControls = new PlayerControls();
         rigidBody = GetComponent<Rigidbody2D>();
+        if (spriteRenderer == null)
+        {
+            spriteRenderer = GetComponentInChildren<SpriteRenderer>();
+        }
     }
 
     private void OnEnable()
@@ -27,6 +33,13 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         PlayerInput();
+
+        animator.SetBool("isWalking", movement.sqrMagnitude > 0f);
+
+        if (movement.x != 0f && spriteRenderer != null)
+        {
+            spriteRenderer.flipX = movement.x < 0f;
+        }
     }
 
     private void FixedUpdate()
