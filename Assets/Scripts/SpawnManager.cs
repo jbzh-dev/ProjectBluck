@@ -1,10 +1,9 @@
 using UnityEngine;
-using UnityEngine.InputSystem;
 
 public class SpawnManager : MonoBehaviour
 {
     [SerializeField] private GameObject[] enemyPrefab;
-    [SerializeField] private InputAction spawnAction;
+    [SerializeField] private float spawnInterval = 2f;
     
     [Header("ตั้งค่าสีศัตรู")]
     [Tooltip("ใส่สีที่ต้องการให้สุ่มใน Inspector (ควรใส่ 2 สีขึ้นไป)")]
@@ -15,17 +14,38 @@ public class SpawnManager : MonoBehaviour
     
     private Camera mainCamera;
     private int lastColorIndex = -1; // เก็บ Index สีล่าสุดเพื่อกันซ้ำ
+    private float spawnTimer;
 
     private void Start()
     {
-        spawnAction.Enable();
         mainCamera = Camera.main;
+        if (mainCamera == null)
+        {
+            Debug.LogError("SpawnManager requires a camera tagged MainCamera.", this);
+            enabled = false;
+            return;
+        }
+
+        if (enemyPrefab == null || enemyPrefab.Length == 0)
+        {
+            Debug.LogError("SpawnManager requires at least one enemy prefab.", this);
+            enabled = false;
+            return;
+        }
+
+        if (spawnInterval <= 0f)
+        {
+            Debug.LogError("Spawn interval must be greater than zero.", this);
+            enabled = false;
+        }
     }
 
     private void Update()
     {
-        if (spawnAction.triggered)
+        spawnTimer += Time.deltaTime;
+        if (spawnTimer >= spawnInterval)
         {
+            spawnTimer = 0f;
             SpawnEnemyAtEdge();
         }
     }
@@ -83,8 +103,4 @@ public class SpawnManager : MonoBehaviour
         }
     }
 
-    private void OnDisable()
-    {
-        spawnAction.Disable();
-    }
 }
